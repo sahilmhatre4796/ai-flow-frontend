@@ -122,7 +122,7 @@ export function RegisterPage({ onSwitchToLogin }) {
   }
 
   if (done) return (
-    <AuthShell title="Check your email" subtitle="We sent a verification link to your inbox">
+    <AuthShell title="Account created!" subtitle="Your account has been created successfully">
       <motion.div
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
@@ -132,7 +132,7 @@ export function RegisterPage({ onSwitchToLogin }) {
           &#10003;
         </div>
         <p className="text-muted" style={{ fontSize: 14, lineHeight: 1.6, textAlign: "center" }}>
-          Click the link we sent to <strong style={{ color: "var(--ink)" }}>{email}</strong> to verify your address, then log in.
+          You can now log in with your email <strong style={{ color: "var(--ink)" }}>{email}</strong> and password.
         </p>
         <motion.button
           onClick={onSwitchToLogin}
@@ -141,7 +141,7 @@ export function RegisterPage({ onSwitchToLogin }) {
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
         >
-          Back to login
+          Log in
         </motion.button>
       </motion.div>
     </AuthShell>
@@ -233,17 +233,17 @@ export function ForgotPasswordPage({ onSwitchToLogin }) {
   }
 
   if (done) return (
-    <AuthShell title="Check your email" subtitle="We sent a password reset link to your inbox">
+    <AuthShell title="Request received" subtitle="Password reset functionality">
       <motion.div
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
       >
-        <div style={{ width: 56, height: 56, borderRadius: 16, background: "rgba(34,197,94,0.12)", color: "var(--status-success)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 20px", fontSize: 24 }}>
-          &#10003;
+        <div style={{ width: 56, height: 56, borderRadius: 16, background: "rgba(251,191,36,0.12)", color: "#fbbf24", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 20px", fontSize: 24 }}>
+          &#9888;
         </div>
         <p className="text-muted" style={{ fontSize: 14, lineHeight: 1.6, textAlign: "center" }}>
-          If an account exists for <strong style={{ color: "var(--ink)" }}>{email}</strong>, you'll receive a password reset link shortly.
+          Password reset is not available yet. Please contact support to reset your password.
         </p>
         <motion.button
           onClick={onSwitchToLogin}
