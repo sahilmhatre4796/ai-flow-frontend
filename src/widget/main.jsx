@@ -39,6 +39,10 @@ function Widget({ botId, color, position }) {
     const socket = new WebSocket(`${WS_BASE_URL}/ws/widget/${botId}?visitor_id=${visitorId.current}`);
     socket.onopen = () => setConnected(true);
     socket.onclose = () => setConnected(false);
+    socket.onerror = () => {
+      setConnected(false);
+      setMessages((m) => [...m, { role: "assistant", content: "Connection lost. Please try again." }]);
+    };
     socket.onmessage = (event) => {
       try {
         const data = JSON.parse(event.data);

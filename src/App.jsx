@@ -3,12 +3,25 @@ import { useState } from "react";
 import { useAuth } from "./AuthContext";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 import { AppShell } from "./dashboard/AppShell";
-import { LoginPage, RegisterPage } from "./pages/Auth";
+import { LoginPage, RegisterPage, ForgotPasswordPage, VerifyEmailPage } from "./pages/Auth";
 import { CreateWorkspacePage } from "./pages/CreateWorkspace";
 
 export default function App() {
   const { bootstrapping, user, workspaces, activeWorkspace } = useAuth();
   const [authView, setAuthView] = useState("login");
+
+  // Handle URL-based routes for email verification and password reset
+  const params = new URLSearchParams(window.location.search);
+  const authToken = params.get("token");
+  const pathView = window.location.pathname;
+
+  if (pathView === "/verify-email" && authToken) {
+    return (
+      <ErrorBoundary>
+        <VerifyEmailPage onSwitchToLogin={() => { window.history.replaceState({}, "/", "/"); setAuthView("login"); }} />
+      </ErrorBoundary>
+    );
+  }
 
   if (bootstrapping) {
     return (
@@ -43,9 +56,14 @@ export default function App() {
             transition={{ duration: 0.3 }}
           >
             {authView === "login" ? (
-              <LoginPage onSwitchToRegister={() => setAuthView("register")} />
-            ) : (
+              <LoginPage
+                onSwitchToRegister={() => setAuthView("register")}
+                onSwitchToForgotPassword={() => setAuthView("forgot-password")}
+              />
+            ) : authView === "register" ? (
               <RegisterPage onSwitchToLogin={() => setAuthView("login")} />
+            ) : (
+              <ForgotPasswordPage onSwitchToLogin={() => setAuthView("login")} />
             )}
           </motion.div>
         ) : workspaces.length === 0 || !activeWorkspace ? (

@@ -10,7 +10,7 @@ const buttonVariants = {
   tap: { scale: 0.98 },
 };
 
-export function LoginPage({ onSwitchToRegister }) {
+export function LoginPage({ onSwitchToRegister, onSwitchToForgotPassword }) {
   const { login } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -73,6 +73,22 @@ export function LoginPage({ onSwitchToRegister }) {
         transition={{ delay: 0.7 }}
         className="text-muted"
         style={{ fontSize: 13, marginTop: 24, textAlign: "center" }}
+      >
+        <motion.a
+          onClick={onSwitchToForgotPassword}
+          whileHover={{ color: "#c7d2fe" }}
+          style={{ color: "#a5b4fc", cursor: "pointer", fontWeight: 600 }}
+        >
+          Forgot password?
+        </motion.a>
+      </motion.p>
+
+      <motion.p
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.7 }}
+        className="text-muted"
+        style={{ fontSize: 13, marginTop: 12, textAlign: "center" }}
       >
         Don't have an account?{" "}
         <motion.a
@@ -191,6 +207,188 @@ export function RegisterPage({ onSwitchToLogin }) {
           Log in
         </motion.a>
       </motion.p>
+    </AuthShell>
+  );
+}
+
+export function ForgotPasswordPage({ onSwitchToLogin }) {
+  const [email, setEmail] = useState("");
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [done, setDone] = useState(false);
+
+  async function submit(e) {
+    e.preventDefault();
+    setError(null);
+    setLoading(true);
+    try {
+      const { forgotPassword } = await import("../api/auth");
+      await forgotPassword(email);
+      setDone(true);
+    } catch (err) {
+      setError(err instanceof ApiError ? err.detail : "Something went wrong.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  if (done) return (
+    <AuthShell title="Check your email" subtitle="We sent a password reset link to your inbox">
+      <motion.div
+        initial={{ opacity: 0, scale: 0.9 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+      >
+        <div style={{ width: 56, height: 56, borderRadius: 16, background: "rgba(34,197,94,0.12)", color: "var(--status-success)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 20px", fontSize: 24 }}>
+          &#10003;
+        </div>
+        <p className="text-muted" style={{ fontSize: 14, lineHeight: 1.6, textAlign: "center" }}>
+          If an account exists for <strong style={{ color: "var(--ink)" }}>{email}</strong>, you'll receive a password reset link shortly.
+        </p>
+        <motion.button
+          onClick={onSwitchToLogin}
+          className="btn btn-primary"
+          style={{ marginTop: 24, width: "100%", height: 44 }}
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+        >
+          Back to login
+        </motion.button>
+      </motion.div>
+    </AuthShell>
+  );
+
+  return (
+    <AuthShell title="Reset your password" subtitle="Enter your email and we'll send you a reset link">
+      <form onSubmit={submit} style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+        <Field label="Email">
+          <input className="input" type="email" required value={email} onChange={e => setEmail(e.target.value)} placeholder="you@company.com" />
+        </Field>
+
+        {error && (
+          <motion.div
+            initial={{ opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            style={{ color: "#fca5a5", fontSize: 13, background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.2)", borderRadius: 10, padding: "10px 14px" }}
+          >
+            {error}
+          </motion.div>
+        )}
+
+        <motion.button
+          type="submit"
+          disabled={loading}
+          className="btn btn-primary"
+          style={{ marginTop: 4, width: "100%", height: 44 }}
+          variants={buttonVariants}
+          initial="rest"
+          whileHover="hover"
+          whileTap="tap"
+        >
+          {loading ? "Sending..." : "Send reset link"}
+        </motion.button>
+      </form>
+
+      <motion.p
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.7 }}
+        className="text-muted"
+        style={{ fontSize: 13, marginTop: 24, textAlign: "center" }}
+      >
+        Remember your password?{" "}
+        <motion.a
+          onClick={onSwitchToLogin}
+          whileHover={{ color: "#c7d2fe" }}
+          style={{ color: "#a5b4fc", cursor: "pointer", fontWeight: 600 }}
+        >
+          Log in
+        </motion.a>
+      </motion.p>
+    </AuthShell>
+  );
+}
+
+export function VerifyEmailPage({ onSwitchToLogin }) {
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [done, setDone] = useState(false);
+
+  useState(() => {
+    const params = new URLSearchParams(window.location.search);
+    const token = params.get("token");
+    if (!token) {
+      setError("No verification token found. Please check your email link.");
+      setLoading(false);
+      return;
+    }
+    import("../api/auth").then(({ verifyEmail }) =>
+      verifyEmail(token).then(() => setDone(true)).catch((err) => {
+        setError(err instanceof ApiError ? err.detail : "Verification failed or link expired.");
+      }).finally(() => setLoading(false))
+    );
+  }, []);
+
+  if (loading) return (
+    <AuthShell title="Verifying your email" subtitle="Please wait...">
+      <motion.div
+        animate={{ opacity: [0.5, 1, 0.5] }}
+        transition={{ duration: 1.2, repeat: Infinity }}
+        style={{ textAlign: "center", color: "var(--text-muted)" }}
+      >
+        Verifying...
+      </motion.div>
+    </AuthShell>
+  );
+
+  if (done) return (
+    <AuthShell title="Email verified" subtitle="Your email has been verified successfully">
+      <motion.div
+        initial={{ opacity: 0, scale: 0.9 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+      >
+        <div style={{ width: 56, height: 56, borderRadius: 16, background: "rgba(34,197,94,0.12)", color: "var(--status-success)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 20px", fontSize: 24 }}>
+          &#10003;
+        </div>
+        <p className="text-muted" style={{ fontSize: 14, lineHeight: 1.6, textAlign: "center" }}>
+          Your email has been verified. You can now log in to your account.
+        </p>
+        <motion.button
+          onClick={onSwitchToLogin}
+          className="btn btn-primary"
+          style={{ marginTop: 24, width: "100%", height: 44 }}
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+        >
+          Log in
+        </motion.button>
+      </motion.div>
+    </AuthShell>
+  );
+
+  return (
+    <AuthShell title="Verification failed" subtitle="We couldn't verify your email">
+      <motion.div
+        initial={{ opacity: 0, scale: 0.9 }}
+        animate={{ opacity: 1, scale: 1 }}
+      >
+        <div style={{ width: 56, height: 56, borderRadius: 16, background: "rgba(239,68,68,0.12)", color: "#fca5a5", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 20px", fontSize: 24 }}>
+          &#10007;
+        </div>
+        <p className="text-muted" style={{ fontSize: 14, lineHeight: 1.6, textAlign: "center" }}>
+          {error}
+        </p>
+        <motion.button
+          onClick={onSwitchToLogin}
+          className="btn btn-primary"
+          style={{ marginTop: 24, width: "100%", height: 44 }}
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+        >
+          Back to login
+        </motion.button>
+      </motion.div>
     </AuthShell>
   );
 }

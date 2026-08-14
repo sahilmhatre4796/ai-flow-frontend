@@ -21,3 +21,11 @@ export async function sendSandboxMessage(workspaceId, botId, text, conversationI
     body: { text },
   });
 }
+
+/** Agent sends a message in a live conversation (agent takeover). */
+export async function sendAgentMessage(workspaceId, conversationId, text) {
+  return request(`/workspaces/${workspaceId}/conversations/${conversationId}/messages`, {
+    method: "POST",
+    body: { text },
+  });
+}
