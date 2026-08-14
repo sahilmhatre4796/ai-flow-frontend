@@ -1,3 +1,4 @@
+import { motion } from "framer-motion";
 import { Download, Target } from "lucide-react";
 import { useEffect, useState } from "react";
 import { downloadLeadsCsv, fetchLeads } from "../api/misc";
@@ -28,16 +29,26 @@ export function LeadsPage({ workspace, goTo }) {
   if (loading) return <Spinner label="Loading leads" />;
 
   return (
-    <div>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }}>
+      <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
         <h1>Leads</h1>
-        {leads.length > 0 && <button className="btn btn-ghost" onClick={exportCsv} disabled={exporting}><Download size={15} />{exporting ? "Exporting…" : "Export CSV"}</button>}
-      </div>
+        {leads.length > 0 && (
+          <motion.button className="btn btn-ghost" onClick={exportCsv} disabled={exporting} whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
+            <Download size={15} />{exporting ? "Exporting..." : "Export CSV"}
+          </motion.button>
+        )}
+      </motion.div>
       <ErrorBanner message={error} />
       {leads.length === 0 ? (
         <EmptyState icon={Target} title="No leads yet" body="When your bot captures contact info during a conversation, real leads appear here." actionLabel="Test your bot" onAction={() => goTo("test")} />
       ) : (
-        <div className="card" style={{ padding: 0, overflow: "hidden" }}>
+        <motion.div
+          className="card"
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4 }}
+          style={{ padding: 0, overflow: "hidden" }}
+        >
           <table style={{ width: "100%", fontSize: 14, borderCollapse: "collapse" }}>
             <thead>
               <tr className="text-muted" style={{ textAlign: "left", fontSize: 12 }}>
@@ -48,18 +59,24 @@ export function LeadsPage({ workspace, goTo }) {
               </tr>
             </thead>
             <tbody>
-              {leads.map(lead => (
-                <tr key={lead.id} style={{ borderTop: "1px solid var(--border)" }}>
+              {leads.map((lead, i) => (
+                <motion.tr
+                  key={lead.id}
+                  initial={{ opacity: 0, x: -8 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: i * 0.03 }}
+                  style={{ borderTop: "1px solid var(--border)" }}
+                >
                   <td style={{ padding: "14px 24px" }}>{lead.name}</td>
                   <td className="text-muted" style={{ padding: "14px 24px" }}>{lead.email}</td>
-                  <td className="text-muted" style={{ padding: "14px 24px" }}>{lead.company || "—"}</td>
+                  <td className="text-muted" style={{ padding: "14px 24px" }}>{lead.company || "---"}</td>
                   <td className="text-muted" style={{ padding: "14px 24px" }}>{new Date(lead.captured_at).toLocaleDateString()}</td>
-                </tr>
+                </motion.tr>
               ))}
             </tbody>
           </table>
-        </div>
+        </motion.div>
       )}
-    </div>
+    </motion.div>
   );
 }

@@ -1,9 +1,15 @@
+import { motion } from "framer-motion";
 import { Bot, Play, Plus } from "lucide-react";
 import { useEffect, useState } from "react";
 import { createBot, updateBot } from "../api/bots";
 import { BotPicker, EmptyState, ErrorBanner, Spinner, errorText, useBots } from "./shared";
 
 const PROVIDER_MODELS = { anthropic: ["claude-sonnet-4-6", "claude-haiku-4-5-20251001"], openai: ["gpt-4o", "gpt-4o-mini"], ollama: ["llama3", "mistral"] };
+
+const item = {
+  initial: { opacity: 0, y: 16 },
+  animate: { opacity: 1, y: 0, transition: { duration: 0.4, ease: [0.22, 1, 0.36, 1] } },
+};
 
 export function BotBuilderPage({ workspace, selectedBotId, setSelectedBotId, bumpBotsVersion, goTo }) {
   const canWrite = workspace.role === "owner" || workspace.role === "admin";
@@ -16,11 +22,24 @@ export function BotBuilderPage({ workspace, selectedBotId, setSelectedBotId, bum
   const selectedBot = bots.find(b => b.id === selectedBotId) || bots[0];
 
   return (
-    <div>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }}>
+      <motion.div
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}
+      >
         <h1>Bot Builder</h1>
-        {canWrite && <button className="btn btn-primary" onClick={() => setCreating(true)}><Plus size={16} />New bot</button>}
-      </div>
+        {canWrite && (
+          <motion.button
+            className="btn btn-primary"
+            onClick={() => setCreating(true)}
+            whileHover={{ scale: 1.03, y: -1 }}
+            whileTap={{ scale: 0.97 }}
+          >
+            <Plus size={16} />New bot
+          </motion.button>
+        )}
+      </motion.div>
       <ErrorBanner message={error} />
       {creating && (
         <CreateBotForm workspace={workspace} onCreated={bot => { setBots(p => [...p, bot]); setSelectedBotId(bot.id); bumpBotsVersion(); setCreating(false); }} onCancel={() => setCreating(false)} />
@@ -33,7 +52,7 @@ export function BotBuilderPage({ workspace, selectedBotId, setSelectedBotId, bum
           {selectedBot && <BotEditor key={selectedBot.id} workspace={workspace} bot={selectedBot} canWrite={canWrite} onUpdated={updated => setBots(p => p.map(b => b.id === updated.id ? updated : b))} onTestBot={() => goTo("test")} />}
         </>
       )}
-    </div>
+    </motion.div>
   );
 }
 
@@ -53,7 +72,14 @@ function CreateBotForm({ workspace, onCreated, onCancel }) {
   }
 
   return (
-    <form onSubmit={submit} className="card fade-in" style={{ marginBottom: 24, display: "flex", flexDirection: "column", gap: 12 }}>
+    <motion.form
+      onSubmit={submit}
+      className="card"
+      initial={{ opacity: 0, y: 12, scale: 0.98 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      transition={{ duration: 0.4 }}
+      style={{ marginBottom: 24, display: "flex", flexDirection: "column", gap: 14, border: "1px solid rgba(99,102,241,0.15)" }}
+    >
       <input className="input" placeholder="Bot name" required value={name} onChange={e => setName(e.target.value)} />
       <textarea className="input" style={{ minHeight: 80, resize: "vertical" }} placeholder="Persona / system prompt" required value={persona} onChange={e => setPersona(e.target.value)} />
       <div style={{ display: "flex", gap: 10 }}>
@@ -66,10 +92,12 @@ function CreateBotForm({ workspace, onCreated, onCancel }) {
       </div>
       {error && <div style={{ color: "#fca5a5", fontSize: 13 }}>{error}</div>}
       <div style={{ display: "flex", gap: 10 }}>
-        <button type="submit" disabled={submitting} className="btn btn-primary">{submitting ? "Creating…" : "Create bot"}</button>
+        <motion.button type="submit" disabled={submitting} className="btn btn-primary" whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+          {submitting ? "Creating..." : "Create bot"}
+        </motion.button>
         <button type="button" className="btn btn-ghost" onClick={onCancel}>Cancel</button>
       </div>
-    </form>
+    </motion.form>
   );
 }
 
@@ -88,12 +116,19 @@ function BotEditor({ workspace, bot, canWrite, onUpdated, onTestBot }) {
   }
 
   return (
-    <div className="card fade-in">
-      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 18 }}>
+    <motion.div
+      className="card"
+      initial={{ opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4, delay: 0.1 }}
+    >
+      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 20 }}>
         <h3>Editing "{bot.name}"</h3>
-        <button className="btn btn-ghost btn-sm" onClick={onTestBot}><Play size={14} />Test this bot</button>
+        <motion.button className="btn btn-ghost btn-sm" onClick={onTestBot} whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+          <Play size={14} />Test this bot
+        </motion.button>
       </div>
-      <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+      <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
         <label style={{ display: "flex", flexDirection: "column", gap: 6 }}>
           <span className="text-muted" style={{ fontSize: 13 }}>Name</span>
           <input className="input" value={name} disabled={!canWrite} onChange={e => setName(e.target.value)} />
@@ -103,8 +138,19 @@ function BotEditor({ workspace, bot, canWrite, onUpdated, onTestBot }) {
           <textarea className="input" style={{ minHeight: 130, resize: "vertical" }} value={persona} disabled={!canWrite} onChange={e => setPersona(e.target.value)} />
         </label>
         {error && <div style={{ color: "#fca5a5", fontSize: 13 }}>{error}</div>}
-        {canWrite && <button className="btn btn-primary" disabled={!dirty || saving} onClick={save} style={{ alignSelf: "flex-start" }}>{saving ? "Saving…" : "Save changes"}</button>}
+        {canWrite && (
+          <motion.button
+            className="btn btn-primary"
+            disabled={!dirty || saving}
+            onClick={save}
+            style={{ alignSelf: "flex-start" }}
+            whileHover={dirty ? { scale: 1.02 } : {}}
+            whileTap={dirty ? { scale: 0.98 } : {}}
+          >
+            {saving ? "Saving..." : "Save changes"}
+          </motion.button>
+        )}
       </div>
-    </div>
+    </motion.div>
   );
 }

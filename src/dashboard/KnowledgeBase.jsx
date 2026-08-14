@@ -1,9 +1,10 @@
+import { motion } from "framer-motion";
 import { Database, FileText, Link2, Trash2, Upload } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { createDocumentFromText, createDocumentFromUrl, deleteDocument, fetchChunks, fetchDocuments, uploadDocument } from "../api/knowledge";
 import { BotPicker, EmptyState, ErrorBanner, NoBotsYet, Spinner, errorText, useBots } from "./shared";
 
-const STATUS_LABEL = { pending: "Queued", parsing: "Parsing…", chunking: "Chunking…", embedding: "Embedding…", ready: "Ready", error: "Error" };
+const STATUS_LABEL = { pending: "Queued", parsing: "Parsing...", chunking: "Chunking...", embedding: "Embedding...", ready: "Ready", error: "Error" };
 const IN_PROGRESS = new Set(["pending", "parsing", "chunking", "embedding"]);
 const STATUS_PILL = { ready: "pill-success", error: "pill-error" };
 
@@ -15,11 +16,11 @@ export function KnowledgeBasePage({ workspace, selectedBotId, setSelectedBotId, 
   if (bots.length === 0) return <NoBotsYet onGoToBuilder={() => goTo("builder")} />;
   const bot = bots.find(b => b.id === selectedBotId) || bots[0];
   return (
-    <div>
-      <h1 style={{ marginBottom: 20 }}>Knowledge Base</h1>
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }}>
+      <motion.h1 initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} style={{ marginBottom: 20 }}>Knowledge Base</motion.h1>
       <BotPicker bots={bots} selectedBotId={bot.id} setSelectedBotId={setSelectedBotId} />
       <DocumentManager key={bot.id} workspace={workspace} bot={bot} canWrite={canWrite} />
-    </div>
+    </motion.div>
   );
 }
 
@@ -53,10 +54,17 @@ function DocumentManager({ workspace, bot, canWrite }) {
         <EmptyState icon={Database} title="No documents yet" body="Upload a file, paste text, or add a URL above — your bot retrieves real answers from whatever you add here." />
       ) : (
         <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-          {documents.map(doc => (
-            <DocumentRow key={doc.id} workspace={workspace} bot={bot} doc={doc} canWrite={canWrite}
-              expanded={expandedId === doc.id} onToggle={() => setExpandedId(expandedId === doc.id ? null : doc.id)}
-              onDeleted={() => setDocuments(d => d.filter(x => x.id !== doc.id))} />
+          {documents.map((doc, i) => (
+            <motion.div
+              key={doc.id}
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: i * 0.05, duration: 0.3 }}
+            >
+              <DocumentRow workspace={workspace} bot={bot} doc={doc} canWrite={canWrite}
+                expanded={expandedId === doc.id} onToggle={() => setExpandedId(expandedId === doc.id ? null : doc.id)}
+                onDeleted={() => setDocuments(d => d.filter(x => x.id !== doc.id))} />
+            </motion.div>
           ))}
         </div>
       )}
@@ -97,17 +105,21 @@ function AddDocumentForm({ workspace, bot, onAdded }) {
 
   const modes = [{ id: "file", label: "Upload file", icon: Upload }, { id: "text", label: "Paste text", icon: FileText }, { id: "url", label: "Website URL", icon: Link2 }];
   return (
-    <div className="card" style={{ marginBottom: 20 }}>
+    <motion.div className="card" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} style={{ marginBottom: 20 }}>
       <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
-        {modes.map(m => { const Icon = m.icon; return <button key={m.id} onClick={() => setMode(m.id)} className={`btn ${mode === m.id ? "btn-primary" : "btn-ghost"}`}><Icon size={14} />{m.label}</button>; })}
+        {modes.map(m => { const Icon = m.icon; return (
+          <motion.button key={m.id} onClick={() => setMode(m.id)} className={`btn ${mode === m.id ? "btn-primary" : "btn-ghost"}`} whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
+            <Icon size={14} />{m.label}
+          </motion.button>
+        ); })}
       </div>
       {error && <div style={{ color: "#fca5a5", fontSize: 13, marginBottom: 12 }}>{error}</div>}
       {mode === "file" && <input type="file" accept=".pdf,.docx,.csv,.txt" disabled={busy} onChange={handleFile} className="text-muted" />}
       {mode === "text" && (
         <form onSubmit={submitText} style={{ display: "flex", flexDirection: "column", gap: 10 }}>
           <input className="input" placeholder="Name (optional)" value={name} onChange={e => setName(e.target.value)} />
-          <textarea className="input" style={{ minHeight: 100 }} placeholder="Paste FAQ content, policies, product info…" required value={text} onChange={e => setText(e.target.value)} />
-          <button type="submit" disabled={busy || !text.trim()} className="btn btn-primary" style={{ alignSelf: "flex-start" }}>{busy ? "Adding…" : "Add text"}</button>
+          <textarea className="input" style={{ minHeight: 100 }} placeholder="Paste FAQ content, policies, product info..." required value={text} onChange={e => setText(e.target.value)} />
+          <motion.button type="submit" disabled={busy || !text.trim()} className="btn btn-primary" style={{ alignSelf: "flex-start" }} whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>{busy ? "Adding..." : "Add text"}</motion.button>
         </form>
       )}
       {mode === "url" && (
@@ -118,10 +130,10 @@ function AddDocumentForm({ workspace, bot, onAdded }) {
             <input type="checkbox" checked={isSitemap} onChange={e => setIsSitemap(e.target.checked)} />
             This is a sitemap.xml — crawl every page in it
           </label>
-          <button type="submit" disabled={busy || !url.trim()} className="btn btn-primary" style={{ alignSelf: "flex-start" }}>{busy ? "Adding…" : "Add URL"}</button>
+          <motion.button type="submit" disabled={busy || !url.trim()} className="btn btn-primary" style={{ alignSelf: "flex-start" }} whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>{busy ? "Adding..." : "Add URL"}</motion.button>
         </form>
       )}
-    </div>
+    </motion.div>
   );
 }
 
@@ -141,24 +153,33 @@ function DocumentRow({ workspace, bot, doc, canWrite, expanded, onToggle, onDele
   }
 
   return (
-    <div className="card">
+    <motion.div className="card" whileHover={{ borderColor: "rgba(99,102,241,0.15)" }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <div onClick={toggle} style={{ cursor: doc.status === "ready" ? "pointer" : "default", flex: 1 }}>
           <div style={{ fontWeight: 600 }}>{doc.name}</div>
           <div className="text-muted" style={{ fontSize: 12, marginTop: 2 }}>{doc.char_count != null ? `${doc.char_count.toLocaleString()} characters · ` : ""}{new Date(doc.created_at).toLocaleString()}</div>
         </div>
         <span className={`pill ${STATUS_PILL[doc.status] || "pill-processing"}`} style={{ marginRight: 14 }}>{STATUS_LABEL[doc.status] || doc.status}</span>
-        {canWrite && <button onClick={remove} disabled={deleting} className="btn btn-danger btn-sm"><Trash2 size={13} /></button>}
+        {canWrite && (
+          <motion.button onClick={remove} disabled={deleting} className="btn btn-danger btn-sm" whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
+            <Trash2 size={13} />
+          </motion.button>
+        )}
       </div>
       {doc.status === "error" && doc.error_message && <div style={{ color: "#fca5a5", fontSize: 12, marginTop: 10 }}>{doc.error_message}</div>}
       {expanded && chunks && (
-        <div style={{ marginTop: 16, borderTop: "1px solid var(--border)", paddingTop: 16 }}>
+        <motion.div
+          initial={{ opacity: 0, height: 0 }}
+          animate={{ opacity: 1, height: "auto" }}
+          transition={{ duration: 0.3 }}
+          style={{ marginTop: 16, borderTop: "1px solid var(--border)", paddingTop: 16 }}
+        >
           <div className="text-muted" style={{ fontSize: 12, marginBottom: 10 }}>{chunks.length} chunks</div>
           <div style={{ display: "flex", flexDirection: "column", gap: 8, maxHeight: 240, overflowY: "auto" }}>
             {chunks.map(c => <div key={c.id} className="text-muted mono" style={{ fontSize: 12, background: "rgba(255,255,255,0.03)", padding: 10, borderRadius: 8 }}>{c.content}</div>)}
           </div>
-        </div>
+        </motion.div>
       )}
-    </div>
+    </motion.div>
   );
 }
