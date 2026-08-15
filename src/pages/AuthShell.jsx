@@ -13,8 +13,8 @@ function AnimatedOrb({ size, color, x, y, delay, duration }) {
         width: size,
         height: size,
         borderRadius: "50%",
-        background: `radial-gradient(circle at 30% 30%, ${color}88, ${color}22, transparent 70%)`,
-        filter: "blur(40px)",
+        background: `radial-gradient(circle at 30% 30%, ${color}, ${color}44, transparent 70%)`,
+        filter: "blur(60px)",
         animation: `orbFloat ${duration}s ease-in-out infinite`,
         animationDelay: `${delay}s`,
       }}
@@ -22,12 +22,9 @@ function AnimatedOrb({ size, color, x, y, delay, duration }) {
   );
 }
 
-function GlowRing({ size, color, rotation, delay }) {
+function GlowRing({ size, color, delay }) {
   return (
-    <motion.div
-      initial={{ opacity: 0, rotate: 0 }}
-      animate={{ opacity: 1, rotate: rotation }}
-      transition={{ delay, duration: 1.5, ease: [0.22, 1, 0.36, 1] }}
+    <div
       style={{
         position: "absolute",
         left: "50%",
@@ -37,8 +34,8 @@ function GlowRing({ size, color, rotation, delay }) {
         marginLeft: -size / 2,
         marginTop: -size / 2,
         borderRadius: "50%",
-        border: `1px solid ${color}44`,
-        boxShadow: `0 0 20px ${color}22, inset 0 0 20px ${color}11`,
+        border: `2px solid ${color}`,
+        opacity: 0.4,
         animation: `ringPulse 4s ease-in-out infinite, ringRotate 20s linear infinite`,
         animationDelay: `${delay}s`,
       }}
@@ -48,10 +45,7 @@ function GlowRing({ size, color, rotation, delay }) {
 
 function FloatingParticle({ x, y, size, delay }) {
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ delay: delay + 0.5, duration: 0.5 }}
+    <div
       style={{
         position: "absolute",
         left: x,
@@ -59,8 +53,8 @@ function FloatingParticle({ x, y, size, delay }) {
         width: size,
         height: size,
         borderRadius: "50%",
-        background: "#818cf8",
-        boxShadow: "0 0 10px #6366f188",
+        background: "#a5b4fc",
+        boxShadow: "0 0 12px #818cf8, 0 0 24px #6366f188",
         animation: `particleFloat ${3 + Math.random() * 2}s ease-in-out infinite`,
         animationDelay: `${delay}s`,
       }}
@@ -69,10 +63,10 @@ function FloatingParticle({ x, y, size, delay }) {
 }
 
 function AIVisual() {
-  const particles = Array.from({ length: 40 }, (_, i) => ({
-    x: `${10 + Math.random() * 80}%`,
-    y: `${10 + Math.random() * 80}%`,
-    size: 2 + Math.random() * 4,
+  const particles = Array.from({ length: 50 }, (_, i) => ({
+    x: `${5 + Math.random() * 90}%`,
+    y: `${5 + Math.random() * 90}%`,
+    size: 3 + Math.random() * 5,
     delay: Math.random() * 2,
   }));
 
@@ -81,69 +75,39 @@ function AIVisual() {
       position: "absolute",
       inset: 0,
       overflow: "hidden",
+      background: "radial-gradient(ellipse at center, rgba(99,102,241,0.08) 0%, transparent 50%)",
     }}>
-      {/* Central glow */}
+      {/* Central bright core */}
       <div style={{
         position: "absolute",
         left: "50%",
         top: "50%",
-        width: 300,
-        height: 300,
-        marginLeft: -150,
-        marginTop: -150,
+        width: 200,
+        height: 200,
+        marginLeft: -100,
+        marginTop: -100,
         borderRadius: "50%",
-        background: "radial-gradient(circle, rgba(99,102,241,0.3) 0%, rgba(139,92,246,0.1) 40%, transparent 70%)",
-        filter: "blur(60px)",
-        animation: "centralPulse 4s ease-in-out infinite",
+        background: "radial-gradient(circle, rgba(129,140,248,0.6) 0%, rgba(99,102,241,0.3) 30%, transparent 60%)",
+        filter: "blur(40px)",
+        animation: "centralPulse 3s ease-in-out infinite",
       }} />
 
-      {/* Orbs */}
-      <AnimatedOrb size={200} color="#6366f1" x="15%" y="20%" delay={0} duration={6} />
-      <AnimatedOrb size={150} color="#a855f7" x="60%" y="60%" delay={0.3} duration={7} />
-      <AnimatedOrb size={180} color="#06b6d4" x="70%" y="15%" delay={0.6} duration={5} />
-      <AnimatedOrb size={120} color="#8b5cf6" x="25%" y="65%" delay={0.4} duration={8} />
-      <AnimatedOrb size={160} color="#6366f1" x="50%" y="40%" delay={0.2} duration={6.5} />
+      {/* Orbs - larger and brighter */}
+      <AnimatedOrb size={280} color="rgba(99,102,241,0.5)" x="10%" y="15%" delay={0} duration={6} />
+      <AnimatedOrb size={220} color="rgba(168,85,247,0.5)" x="55%" y="55%" delay={0.3} duration={7} />
+      <AnimatedOrb size={250} color="rgba(6,182,212,0.4)" x="65%" y="10%" delay={0.6} duration={5} />
+      <AnimatedOrb size={180} color="rgba(139,92,246,0.5)" x="20%" y="60%" delay={0.4} duration={8} />
+      <AnimatedOrb size={200} color="rgba(99,102,241,0.4)" x="45%" y="35%" delay={0.2} duration={6.5} />
 
-      {/* Glow rings */}
-      <GlowRing size={280} color="#6366f1" rotation={45} delay={0.5} />
-      <GlowRing size={350} color="#06b6d4" rotation={-30} delay={0.7} />
-      <GlowRing size={220} color="#a855f7" rotation={60} delay={0.9} />
+      {/* Glow rings - more visible */}
+      <GlowRing size={300} color="rgba(99,102,241,0.5)" delay={0.5} />
+      <GlowRing size={380} color="rgba(6,182,212,0.4)" delay={0.7} />
+      <GlowRing size={240} color="rgba(168,85,247,0.4)" delay={0.9} />
 
       {/* Particles */}
       {particles.map((p, i) => (
         <FloatingParticle key={i} {...p} />
       ))}
-
-      {/* Animated lines */}
-      <svg style={{ position: "absolute", inset: 0, width: "100%", height: "100%" }}>
-        <defs>
-          <linearGradient id="lineGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#6366f1" stopOpacity="0.4" />
-            <stop offset="100%" stopColor="#a855f7" stopOpacity="0.1" />
-          </linearGradient>
-        </defs>
-        {[...Array(8)].map((_, i) => {
-          const x1 = 20 + Math.random() * 60;
-          const y1 = 20 + Math.random() * 60;
-          const x2 = x1 + (Math.random() - 0.5) * 30;
-          const y2 = y1 + (Math.random() - 0.5) * 30;
-          return (
-            <line
-              key={i}
-              x1={`${x1}%`}
-              y1={`${y1}%`}
-              x2={`${x2}%`}
-              y2={`${y2}%`}
-              stroke="url(#lineGrad)"
-              strokeWidth="1"
-              style={{
-                animation: `linePulse 3s ease-in-out infinite`,
-                animationDelay: `${i * 0.3}s`,
-              }}
-            />
-          );
-        })}
-      </svg>
     </div>
   );
 }
@@ -168,60 +132,45 @@ export function AuthShell({ title, subtitle, children }) {
       <style>{`
         @keyframes orbFloat {
           0%, 100% { transform: translate(0, 0) scale(1); }
-          25% { transform: translate(10px, -15px) scale(1.05); }
-          50% { transform: translate(-5px, 10px) scale(0.95); }
-          75% { transform: translate(-10px, -5px) scale(1.02); }
+          25% { transform: translate(15px, -20px) scale(1.05); }
+          50% { transform: translate(-10px, 15px) scale(0.95); }
+          75% { transform: translate(-15px, -10px) scale(1.02); }
         }
         @keyframes ringPulse {
-          0%, 100% { opacity: 0.3; transform: scale(1); }
-          50% { opacity: 0.6; transform: scale(1.05); }
+          0%, 100% { opacity: 0.2; transform: scale(1); }
+          50% { opacity: 0.5; transform: scale(1.05); }
         }
         @keyframes ringRotate {
           from { transform: rotate(0deg); }
           to { transform: rotate(360deg); }
         }
         @keyframes particleFloat {
-          0%, 100% { transform: translate(0, 0); opacity: 0.6; }
-          50% { transform: translate(${Math.random() > 0.5 ? '' : '-'}10px, -15px); opacity: 1; }
+          0%, 100% { transform: translate(0, 0); opacity: 0.5; }
+          50% { transform: translate(8px, -12px); opacity: 1; }
         }
         @keyframes centralPulse {
-          0%, 100% { transform: scale(1); opacity: 0.6; }
-          50% { transform: scale(1.1); opacity: 0.8; }
-        }
-        @keyframes linePulse {
-          0%, 100% { opacity: 0.3; }
-          50% { opacity: 0.7; }
-        }
-        @keyframes fadeInUp {
-          from { opacity: 0; transform: translateY(20px); }
-          to { opacity: 1; transform: translateY(0); }
+          0%, 100% { transform: scale(1); opacity: 0.7; }
+          50% { transform: scale(1.15); opacity: 1; }
         }
       `}</style>
       <div className="auth-container" style={{
         minHeight: "100vh",
         display: "flex",
+        flexDirection: "row",
         background: "#050510",
         position: "relative",
         overflow: "hidden",
       }}>
         {/* Left visual panel */}
         <div className="auth-visual-panel" style={{
-          flex: 1,
+          flex: "1 1 50%",
+          minWidth: 0,
           position: "relative",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
           overflow: "hidden",
         }}>
-          {/* Background gradient */}
-          <div style={{
-            position: "absolute",
-            inset: 0,
-            background: "radial-gradient(ellipse at 30% 50%, rgba(99,102,241,0.12) 0%, rgba(5,5,16,0) 60%)",
-            pointerEvents: "none",
-          }} />
-
-          {/* Animated AI visual */}
           <AIVisual />
 
           {/* Left panel content */}
@@ -275,28 +224,15 @@ export function AuthShell({ title, subtitle, children }) {
 
         {/* Right form panel */}
         <div className="auth-form-panel" style={{
-          width: 520,
+          flex: "0 0 520px",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
           padding: 48,
           position: "relative",
-          background: "rgba(10,10,30,0.6)",
-          borderLeft: "1px solid rgba(99,102,241,0.1)",
-          backdropFilter: "blur(40px)",
+          background: "rgba(10,10,30,0.8)",
+          borderLeft: "1px solid rgba(99,102,241,0.15)",
         }}>
-          {/* Glow effect on right panel */}
-          <div style={{
-            position: "absolute",
-            top: "50%",
-            left: 0,
-            width: 200,
-            height: 400,
-            transform: "translate(-50%, -50%)",
-            background: "radial-gradient(ellipse, rgba(99,102,241,0.08) 0%, transparent 70%)",
-            pointerEvents: "none",
-          }} />
-
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
