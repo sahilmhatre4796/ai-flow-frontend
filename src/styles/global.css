@@ -325,3 +325,18 @@ a { color: inherit; }
   pointer-events: none;
   z-index: 0;
 }
+
+/* Auth page responsive styles */
+@media (max-width: 900px) {
+  .auth-container {
+    flex-direction: column !important;
+  }
+  .auth-visual-panel {
+    display: none !important;
+  }
+  .auth-form-panel {
+    width: 100% !important;
+    border-left: none !important;
+    padding: 32px 24px !important;
+  }
+}
