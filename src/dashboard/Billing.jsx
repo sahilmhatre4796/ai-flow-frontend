@@ -1,10 +1,13 @@
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
-import { ApiError } from "../api/client";
-import { createCheckoutSession, fetchUsage } from "../api/misc";
-import { Spinner, errorText } from "./shared";
+import { fetchUsage } from "../api/misc";
+import { Spinner } from "./shared";
 
-const PLANS = [{ id: "pro", label: "Pro" }, { id: "business", label: "Business" }];
+const PLANS = [
+  { id: "free", label: "Free", price: "$0", priceINR: "₹0 (India)", features: ["1 bot", "100 messages/month", "0 documents", "1 team member"] },
+  { id: "pro", label: "Pro", price: "$10/month", priceINR: "₹999/month (India)", features: ["Unlimited bots", "1,000 messages/month", "10 documents", "3 team members"] },
+  { id: "business", label: "Business", price: "$10/month", priceINR: "₹999/month (India)", features: ["Unlimited bots", "10,000 messages/month", "100 documents", "10 team members"] },
+];
 
 const stagger = {
   animate: { transition: { staggerChildren: 0.1 } },
@@ -18,39 +21,20 @@ const item = {
 export function BillingPage({ workspace }) {
   const canManage = workspace.role === "owner";
   const [usage, setUsage] = useState(null);
-  const [error, setError] = useState(null);
-  const [checkingOut, setCheckingOut] = useState(null);
 
   useEffect(() => {
     let cancelled = false;
     fetchUsage(workspace.id)
       .then(u => !cancelled && setUsage(u))
-      .catch(err => !cancelled && setError(errorText(err, "Couldn't load billing info")));
+      .catch(() => {});
     return () => { cancelled = true; };
   }, [workspace.id]);
-
-  async function upgrade(plan) {
-    setCheckingOut(plan); setError(null);
-    try {
-      const { checkout_url } = await createCheckoutSession(workspace.id, plan);
-      window.location.href = checkout_url;
-    } catch (err) {
-      setError(err instanceof ApiError && err.status === 501
-        ? "Stripe isn't configured on this server yet — set STRIPE_SECRET_KEY and price IDs in the backend .env."
-        : errorText(err, "Couldn't start checkout"));
-    } finally { setCheckingOut(null); }
-  }
 
   if (!usage) return <Spinner label="Loading billing" />;
 
   return (
     <motion.div variants={stagger} initial="initial" animate="animate">
       <motion.h1 variants={item} style={{ marginBottom: 20 }}>Billing</motion.h1>
-      {error && (
-        <motion.div variants={item} style={{ color: "#fca5a5", marginBottom: 16, fontSize: 13, background: "rgba(239,68,68,0.06)", border: "1px solid rgba(239,68,68,0.2)", borderRadius: 12, padding: "12px 16px" }}>
-          {error}
-        </motion.div>
-      )}
       <motion.div variants={item} className="card" style={{ marginBottom: 24 }}>
         <h3 style={{ marginBottom: 20, textTransform: "capitalize" }}>Current plan: {usage.plan}</h3>
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24 }}>
@@ -64,7 +48,7 @@ export function BillingPage({ workspace }) {
       </motion.div>
 
       {canManage && (
-        <motion.div variants={item} style={{ display: "grid", gridTemplateColumns: "repeat(2,1fr)", gap: 16 }}>
+        <motion.div variants={item} style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 16 }}>
           {PLANS.map(p => (
             <motion.div
               key={p.id}
@@ -72,15 +56,32 @@ export function BillingPage({ workspace }) {
               whileHover={{ y: -3 }}
             >
               <h3 style={{ marginBottom: 16 }}>{p.label}</h3>
+              <div style={{ fontSize: 14, marginBottom: 16 }}>
+                <span style={{ fontWeight: 600, color: "#a78bfa" }}>{p.price}</span>
+                <span style={{ color: "#6b7280", marginLeft: 8 }}>{p.priceINR}</span>
+              </div>
+              <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
+                {p.features.map((f, i) => (
+                  <li key={i} style={{ fontSize: 13, marginBottom: 8, color: "#cbd5e1" }}>
+                    • {f}
+                  </li>
+                ))}
+              </ul>
               <motion.button
                 className="btn btn-primary"
-                style={{ width: "100%" }}
-                disabled={usage.plan === p.id || checkingOut === p.id}
-                onClick={() => upgrade(p.id)}
+                style={{ width: "100%", marginTop: 12 }}
+                disabled={usage.plan === p.id}
+                onClick={() => {
+                  if (p.id === "free") return;
+                  const baseUrl = "https://t.me/Chaincraftsupport";
+                  const message = `Hi, I'd like to subscribe to AIFlow ${p.label}.`;
+                  const url = `${baseUrl}?start=${encodeURIComponent(message)}`;
+                  window.open(url, '_blank');
+                }}
                 whileHover={usage.plan !== p.id ? { scale: 1.02 } : {}}
                 whileTap={usage.plan !== p.id ? { scale: 0.98 } : {}}
               >
-                {checkingOut === p.id ? "Redirecting..." : usage.plan === p.id ? "Current plan" : `Upgrade to ${p.label}`}
+                {usage.plan === p.id ? "Current plan" : p.id === "free" ? "Free forever" : `Subscribe to ${p.label}`}
               </motion.button>
             </motion.div>
           ))}
